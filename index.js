@@ -144,3 +144,233 @@ function viewAction(table) {
       break;
   }
 }
+function addAction(table) {
+    let query;
+    let param;
+    switch (table) {
+      case "Department":
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              name: "deptName",
+              message: "What is the name of the department?",
+              validate(deptName) {
+                if (!deptName) {
+                  return "Please enter a department name";
+                }
+                return true;
+              },
+            },
+          ])
+          .then((val) => {
+            query = "INSERT INTO department (name) VALUES (?)";
+            param = [val.deptName];
+          
+            runQuery(query, param).then(() => mainSelect());
+          });
+        break;
+  
+      case "Role":
+       
+        query = "SELECT name from department";
+        getQuery(query).then((choices) => {
+          inquirer
+            .prompt([
+              {
+                type: "input",
+                name: "roleName",
+                message: "What is the name of the role?",
+                validate(roleName) {
+                  if (!roleName) {
+                    return "Please enter a role name";
+                  }
+                  return true;
+                },
+              },
+              {
+                type: "input",
+                name: "roleSalary",
+                message: "What is the salary of the role?",
+                validate(roleSalary) {
+                  if (!roleSalary) {
+                    return "Please enter a salary";
+                  }
+                  if (!/[0-9]/gi.test(roleSalary)) {
+                    return "Please enter a non-zero number";
+                  }
+                  return true;
+                },
+              },
+              {
+                type: "list",
+                name: "roleDept",
+                message: "Which department does this role belong to?",
+                choices: [...choices],
+              },
+            ])
+            .then((val) => {
+            
+              query = `SELECT id as name FROM department WHERE name = '${val.roleDept}'`;
+              getQuery(query).then((choices) => {
+               
+                query =
+                  "INSERT INTO role (title,salary,department_id) VALUES (?,?,?)";
+                param = [val.roleName, parseInt(val.roleSalary), ...choices];
+                runQuery(query, param).then(() => mainSelect());
+              });
+            });
+        });
+        break;
+  
+      case "Employee":
+        let title;
+        let manager;
+        
+        query = "SELECT title as name from role";
+        getQuery(query).then((choices) => {
+          title = [...choices];
+        });
+       
+        query = "SELECT concat(first_name,' ',last_name) as name from employee";
+        getQuery(query)
+          .then((choices) => {
+            
+            manager = ["None", ...choices];
+          })
+          .then(() => {
+            inquirer
+              .prompt([
+                {
+                  type: "input",
+                  name: "firstName",
+                  message: "What is the first name of the employee?",
+                  validate(firstName) {
+                    if (!firstName) {
+                      return "Please enter the first name";
+                    }
+                    return true;
+                  },
+                },
+                {
+                  type: "input",
+                  name: "lastName",
+                  message: "What is the last name of the employee?",
+                  validate(lastName) {
+                    if (!lastName) {
+                      return "Please enter the last name";
+                    }
+                    return true;
+                  },
+                },
+                {
+                  type: "list",
+                  name: "role",
+                  message: "What is the role of the employee?",
+                  choices: [...title],
+                },
+                {
+                  type: "list",
+                  name: "manager",
+                  message: "Who is the manager of the employee?",
+                  choices: [...manager],
+                },
+              ])
+              .then((val) => {
+                let roleId;
+                let managerId;
+                let fields = "(first_name, last_name, role_id";
+                let values = "(?,?,?";
+  
+                
+                if (manager !== "None") {
+                
+                  query = `SELECT id as name FROM employee WHERE CONCAT(first_name,' ',last_name) = '${val.manager}'`;
+                  getQuery(query).then((choices) => {
+                    [managerId] = choices;
+                    fields += ", manager_id)";
+                    values += ",?)";
+                  });
+                } else {
+                  fields += ")";
+                  values += ")";
+                }
+  
+                
+                query = `SELECT id as name FROM role WHERE title = '${val.role}'`;
+                getQuery(query).then((choices) => {
+                  [roleId] = choices;
+                 
+                  query = `INSERT INTO employee ${fields} VALUES ${values}`;
+                  param =
+                    manager !== "None"
+                      ? [val.firstName, val.lastName, roleId, managerId]
+                      : [val.firstName, val.lastName, roleId];
+                  runQuery(query, param).then(() => mainSelect());
+                });
+              });
+          });
+        break;
+    }
+  }
+  function updateAction(table) {
+    let prompt = [];
+    let message;
+  
+    if (table === "Role") {
+    
+      query = "SELECT title as name from role";
+      getQuery(query).then((choices) => {
+        prompt = [...choices];
+        message = "Which role do you want to assign the selected employee?";
+      });
+    }
+  
+    query = "SELECT concat(first_name,' ',last_name) as name from employee";
+    getQuery(query).then((choices) => {
+      
+      if (table !== "Role") {
+        prompt = [...choices];
+        message = "Which manager do you want to assign the selected employee?";
+      }
+   
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "name",
+            message: "Which employee do you want to update?",
+            choices: [...choices],
+          },
+          {
+            type: "list",
+            name: "update",
+            message: message,
+            choices: [...prompt],
+          },
+        ])
+        .then((val) => {
+  
+          if (table === "Role") {
+            query = `SELECT id as name FROM role WHERE title = '${val.update}'`;
+          } else {
+            query = `SELECT id as name FROM employee WHERE CONCAT(first_name,' ',last_name) = '${val.update}'`;
+          }
+          getQuery(query).then((choices) => {
+            [roleId] = choices;
+           
+            if (table === "Role") {
+              query = `UPDATE employee SET role_id = ? WHERE CONCAT(first_name,' ',last_name) = '${val.name}'`;
+            } else {
+              query = `UPDATE employee SET manager_id = ? WHERE CONCAT(first_name,' ',last_name) = '${val.name}'`;
+            }
+            param = [roleId];
+        
+            runQuery(query, param).then(() => {
+              console.log(`${val.name} updated.`);
+              mainSelect();
+            });
+          });
+        });
+    });
+  }
