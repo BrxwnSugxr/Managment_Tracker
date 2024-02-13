@@ -27,11 +27,36 @@ function mainSelect() {
       },
     ])
     .then((val) => {
+      
       const action = val.action.split(' ');
 
       switch (action[0]) {
-        case "View":
-            viewAction
+        case 'View':
+          
+          viewAction(action[2]);
+          break;
+        case 'Add':
+          
+          addAction(action[1]);
+          break;
+        case 'Update':
+          
+          updateAction(action[2]);
+          break;
+        case 'Delete':
+          
+          deleteAction(action[1]);
+          break;
+        default:
+          quit();
       }
     });
 }
+
+
+function quit() {
+    console.log("\nGoodbye!");
+    process.exit(0);
+  }
+
+  
