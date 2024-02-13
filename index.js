@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const [runQuery, getQuery] = require('./helper/sqlUtils');
 
+
 function init() {
   console.log(`
  ================================================================================
@@ -17,6 +18,10 @@ function init() {
  ================================================================================`);
   mainSelect();
 }
+
+
+
+
 
 function mainSelect() {
   inquirer
@@ -450,5 +455,6 @@ function deleteInq(field, table) {
       });
   });
 }
+
 
 init();
