@@ -374,3 +374,73 @@ function addAction(table) {
         });
     });
   }
+
+  function deleteAction(table) {
+    let field;
+  
+    switch (table) {
+      case "Department":
+        field = "name";
+        break;
+  
+      case "Role":
+        field = "title";
+        break;
+  
+      case "Employee":
+        field = "CONCAT(first_name, ' ', last_name)";
+        break;
+  
+      default:
+        break;
+    }
+  
+    deleteInq(field, table);
+  }
+  
+  function deleteInq(field, table) {
+    const select = `SELECT ${field} as name from ${table}`;
+    const deleteSt = `DELETE FROM ${table} where ${field} = (?)`;
+    const message = `Which ${table} do you want to delete?`;
+  
+    getQuery(select).then((choices) => {
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "name",
+            message: message,
+            choices: [...choices],
+          },
+        ])
+        .then((val) => {
+          let query;
+          if (table === "Employee") {
+            // we don't need to worry about deleting a record in the employee table
+            param = [val.name];
+            runQuery(deleteSt, param).then(() => mainSelect());
+          } else {
+            // if record is to be deleted in either department or role, we should check first if there's a child record related to the record to be deleted
+            if (table === "Department") {
+              query = `SELECT title as name FROM department join role on department.id = role.department_id where name = '${val.name}'`;
+            }
+            if (table === "Role") {
+              query = `SELECT CONCAT(first_name,' ',last_name) as name FROM employee join role on employee.role_id = role.id where title = '${val.name}'`;
+            }
+  
+            getQuery(query).then((choices) => {
+              const tableName = table === "Department" ? "role" : "emnployee";
+              if (choices.length > 0) {
+                console.log(
+                  `Cannot delete ${val.name}. It has a child record in the ${tableName} table.`
+                );
+                mainSelect();
+              } else {
+                param = [val.name];
+                runQuery(deleteSt, param).then(() => mainSelect());
+              }
+            });
+          }
+        });
+    });
+  }
