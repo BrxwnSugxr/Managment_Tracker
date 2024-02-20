@@ -41,7 +41,7 @@ This program is ran using Node.js with modules Inquirer and MySQL2 that handles 
 
 The program is run in the command line, giving the user a selection of actions. After selecting a command, the application would either show the table with the records or ask additional questions about the command.
 
-![Database schema includes tables labeled “employee,” role,” and “department.”](./assets/EmployeeTracker.gif)
+![Database schema includes tables labeled “employee,” role,” and “department.”](./assets/12-sql-homework-demo-01.gif)
 
 ## Installation
 
