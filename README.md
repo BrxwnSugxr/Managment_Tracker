@@ -1,5 +1,7 @@
 # Employee Tracker
 
+![Introduction.”](./Assets/sc-intro.png)
+
 ## Description
 
 This is a Javascript command-line application that views and interacts with information stored in a database -- specifically, a company database. The company database has three main tables: Department, Role, and Employee.
@@ -17,7 +19,7 @@ The role table consists of the name of the role, the salary for that role, and t
 The employee table consists of the employee's id number, first name and last name, role id and manager id that links the record to the role table and employee table respectively.
 
 The tables are linked as shown:
-![Database schema includes tables labeled “employee,” role,” and “department.”](./assets/schema.png)
+![Database schema includes tables labeled “employee,” role,” and “department.”](./Assets/schema.png)
 
 The application lists an selection of commands that can be used to interact with the data from the database. In general, the user can either view data, add or update employee details, and delete records from the tables.
 
@@ -41,7 +43,9 @@ This program is ran using Node.js with modules Inquirer and MySQL2 that handles 
 
 The program is run in the command line, giving the user a selection of actions. After selecting a command, the application would either show the table with the records or ask additional questions about the command.
 
-![Database schema includes tables labeled “employee,” role,” and “department.”](./assets/12-sql-homework-demo-01.gif)
+![Database schema includes tables labeled “employee,” "role," and "department.”](./Assets/overview.png)
+
+![Database schema includes tables labeled “employee,” "role," and "department.”](./Assets/overview2.png)
 
 ## Installation
 
@@ -49,6 +53,11 @@ After forking the project, run the code below to install the modules needed to r
 
 ```
 npm install
+npm init -y
+npm i inquirer@8.2.4
+npm i mysql2
+npm i dotenv
+npm i console.table
 ```
 
 Also run the following in mysql to create the database and also seed the database with sample records.
